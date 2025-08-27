@@ -11,7 +11,7 @@ if(POLICY CMP0091)
     # https://stackoverflow.com/a/56490614
     cmake_policy(SET CMP0091 NEW)
 endif()
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+# set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 project(infoware VERSION "${infoware_version}" LANGUAGES CXX)
 
