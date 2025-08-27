@@ -244,6 +244,8 @@ if(NOT APPLE AND INFOWARE_USE_X11)
 	endif()
 endif()
 
+target_include_directories(infoware PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+											   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 if(INFOWARE_EXAMPLES)
 	file(GLOB infoware_example_sources LIST_DIRECTORIES false examples/*.cpp)
@@ -286,9 +288,7 @@ if(INFOWARE_INSTALL)
 			RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 			LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 			PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/infoware)
-	target_include_directories(infoware PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-											   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
+	
 	# Create infowareConfigVersion package used to specify installed package version
 	include(CMakePackageConfigHelpers)
 	write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/cmake/infowareConfigVersion.cmake"
