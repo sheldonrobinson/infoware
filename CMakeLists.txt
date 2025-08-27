@@ -27,6 +27,7 @@ option(INFOWARE_USE_PCIIDS "Want PCI IDs. If disabled, the PCI ID database will 
 
 option(INFOWARE_EXAMPLES "Add infoware examples to the build." OFF)
 option(INFOWARE_TESTS    "Input tests for infoware."           OFF)
+option(INFOWARE_INSTALL  "Install libraries and binaries."     OFF)
 
 set(INFOWARE_PCI_IDS_PATH       ""                                   CACHE FILEPATH "pci.ids file to use. Overrides cloning from INFOWARE_PCI_IDS_REPOSITORY.")
 set(INFOWARE_PCI_IDS_REPOSITORY "https://github.com/pciutils/pciids" CACHE STRING   "Path/URL to clone a pciids git repository from if override path not supplied. Defaults to https://github.com/pciutils/pciids.")
@@ -274,32 +275,33 @@ if(INFOWARE_TESTS)
 	enable_testing()
 endif()
 
+if(INFOWARE_INSTALL)
+	# Use GNU install directories if CMAKE_INSTALL_PREFIX not specified
+	include(GNUInstallDirs)
 
-# Use GNU install directories if CMAKE_INSTALL_PREFIX not specified
-include(GNUInstallDirs)
+	# Specify where library and headers will be installed
+	install(TARGETS infoware
+			EXPORT infowareTargets
+			ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+			RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+			LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+			PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/infoware)
+	target_include_directories(infoware PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+											   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-# Specify where library and headers will be installed
-install(TARGETS infoware
-        EXPORT infowareTargets
-        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/infoware)
-target_include_directories(infoware PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+	# Create infowareConfigVersion package used to specify installed package version
+	include(CMakePackageConfigHelpers)
+	write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/cmake/infowareConfigVersion.cmake"
+									 VERSION ${VERSION}
+									 COMPATIBILITY AnyNewerVersion)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/infowareConfigVersion.cmake
+			DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/infoware
+			COMPONENT devel)
 
-# Create infowareConfigVersion package used to specify installed package version
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/cmake/infowareConfigVersion.cmake"
-                                 VERSION ${VERSION}
-                                 COMPATIBILITY AnyNewerVersion)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/infowareConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/infoware
-        COMPONENT devel)
-
-# Specifying config file that will be used to find a library using find_package().
-export(TARGETS ${PROJECT_NAME}
-       FILE infowareConfig.cmake)
-install(EXPORT infowareTargets
-        FILE infowareConfig.cmake
-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/infoware)
+	# Specifying config file that will be used to find a library using find_package().
+	export(TARGETS ${PROJECT_NAME}
+		   FILE infowareConfig.cmake)
+	install(EXPORT infowareTargets
+			FILE infowareConfig.cmake
+			DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/infoware)
+endif()
